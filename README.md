@@ -36,7 +36,7 @@
 * Usually you will request a key. If and when provided you will have to use that key in your Endpoint call
 * When you get a key to an API make sure to see if and what the limit of requests are.
 
-##### Part 5 - Gitignore and Environmental Variables
+##### Part 3 - Gitignore and Environmental Variables
 
 * If everybody gets a unique key how can we keep it safe so nobody steals it
 * NEVER PUSH YOUR KEY TO GITHUB
@@ -52,19 +52,19 @@
 * gitignore the text and database files
 * push to github and see what happens
 
-##### Part 3 - A Breif extension of RESTful Practices
+##### Part 4 - A Brief extension of RESTful Practices
 
 ***It may not make complete sense until next phase when we start building web applications that others can access***
 
 * We know that we can employ RESTful practices to API operations following CRUD and HTTP Verbs
 * Remember APIs are not only external. Your SQLite MVC applications can and show follow RESTful practices
 * Six Restful Rules From [This Blog](http://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask) and also the [REST Wiki](https://en.wikipedia.org/wiki/Representational_state_transfer#Uniform_interface)
-	* Client-Server
-	* Stateless
-	* Cacheable
-	* Layered System
-	* Uniform Interface
-	* Code on Demand
+    * Client-Server
+    * Stateless
+    * Cacheable
+    * Layered System
+    * Uniform Interface
+    * Code on Demand
 
 * The same endpoint can be used multiple times. The HTTP Verb / Method is important in telling the application what the type of request is
 
@@ -78,7 +78,9 @@
 | DELETE      | Delete a specific item        | http://movies.com/api/movies/898 |
 
 
+##### Resources
 
-
-
+ - Gitignore: [https://help.github.com/articles/ignoring-files/](https://help.github.com/articles/ignoring-files/)
+ - REST and Python: [http://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask](http://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask)
+ - REST Wiki [https://en.wikipedia.org/wiki/Representational_state_transfer#Uniform_interface](https://en.wikipedia.org/wiki/Representational_state_transfer#Uniform_interface)
 
