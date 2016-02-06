@@ -1,3 +1,4 @@
+
 class View:
 
 	def start(self):
@@ -19,3 +20,61 @@ class View:
 
 	def user_login(self):
 		print("welcome")
+
+	def search_term(self):
+		company= input("what is the company name :")
+		return company
+
+	def main_menu(self):
+		choice = input(
+"""
+[1] Search Stocks
+[2] View Portfolio
+[3] Quit
+""")
+		return choice
+
+	def print_results(self, results):
+		print("we found : ")
+		count = 1
+		for k in results:
+			print(count,k['Symbol'],k['Name'])
+			count+=1
+
+	def which_result(self):
+		print("which company were you looking for")
+		name = input("type the brands' symbol: ")
+		return name
+
+	def show_value(self, stock_price):
+		print("""""""""""""""""""""""""""""")
+		print("-----------------------------")
+		for k,v in stock_price.items():
+			print(k,v)
+		print("-----------------------------")
+
+	def buy_main(self):
+		buy_main = input("""
+			[1] Buy Stock
+			[2] Main Menu
+			""")
+		return buy_main
+
+	def display_check(self):
+		num_stocks = int(input("How many stocks do you want to purchase?"))
+		return num_stocks
+		
+	def display_option(self):
+		buy_menu = input(
+"""
+[y]  I do want to purchase
+
+[n]  Go back to main menu
+
+"""
+)
+		return buy_menu
+
+
+		
+
