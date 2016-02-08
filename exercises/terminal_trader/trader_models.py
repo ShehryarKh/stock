@@ -11,7 +11,7 @@ class UserDatabase:
 		self.stocks = None 
 		self.symbol = ''
 
-	def check_account(self,login):
+	def check_and_load_account(self,login):
 		conn = sqlite3.connect(self.file_name)
 		cursor = conn.cursor()
 
@@ -22,16 +22,25 @@ class UserDatabase:
 			""", (login["username"],login["password"]))
 
 		row = cursor.fetchone()
-		conn.commit()
-		conn.close()
-		if row == None:
-			return False 
 		self.id = row[0]
 		self.username = row[1]
 		self.password = row[2]
 		self.funds = row[3]
 		self.is_admin = row[4]
-		return True
+		if row == None:
+			return False 
+		else:
+			cursor.execute(
+			"""SELECT Stocks.symbol,Stocks.num_shares 
+			FROM Stocks JOIN Users ON Stocks.user_id = Users.id 
+			WHERE Users.username = ? AND Users.password = ?;
+			""", (self.username,self.password))
+
+			row2 = cursor.fetchall()
+			if row2 == None:
+				self.stocks = None 
+			self.stocks = row2  
+			return True
 
 	def load_accounts(self):
 		conn = sqlite3.connect(self.file_name)
@@ -50,19 +59,6 @@ class UserDatabase:
 			return None 
 		self.stocks = row  
 		return row 
-
-	def update_users(self):
-		conn = sqlite3.connect(self.file_name)
-		cursor = conn.cursor()
-
-		cursor.execute(
-			"""UPDATE Users 
-			SET funds = ? 
-			WHERE username = ? AND password = ?;
-			""",(self.funds, self.username,self.password))
-
-		conn.commit()
-		conn.close()
 
 	def update_stocks(self,dic):
 		conn = sqlite3.connect(self.file_name)
@@ -88,26 +84,30 @@ class UserDatabase:
 				WHERE symbol = ? AND user_id = ?;
 				""",(row[0]-int(dic["num_shares"]),dic["symbol"],self.id))
 
+		cursor.execute(
+			"UPDATE Users SET funds = ? WHERE id = ?;", (self.funds,self.id))
+		#finally, insert funds minus amount bougat to update your funds 
+
 		conn.commit()
 		conn.close()
 		
-	def buy_stock(self,num_shares):
+	def buy_stock(self,num_shares,symbol):
 		conn = sqlite3.connect(self.file_name)
 		cursor = conn.cursor()
 
 		cursor.execute(
-			"SELECT id,num_shares FROM Stocks WHERE user_id = ? AND symbol = ?;",(self.id,self.symbol)
+			"SELECT id,num_shares FROM Stocks WHERE user_id = ? AND symbol = ?;",(self.id,symbol)
 			)
 
 		row = cursor.fetchone()
 		if row == None: # if row doesn't exist
 			cursor.execute(
-			"INSERT INTO Stocks (symbol, num_shares, user_id) VALUES (?,?,?);",(self.symbol, num_shares, self.id)
+			"INSERT INTO Stocks (symbol, num_shares, user_id) VALUES (?,?,?);",(symbol, num_shares, self.id)
 			) #insert data above
 		else:#if row exists
 			id_ = row[0]
 			cursor.execute(
-				"UPDATE Stocks SET num_shares = ? WHERE id = ?;",(row[1]+int(num_shares), id_))
+				"UPDATE Stocks SET num_shares = ? WHERE user_id = ?;",(row[1]+int(num_shares), self.id))
 				#add numshares to the index row[1] which is where existing num exists
 		cursor.execute(
 			"UPDATE Users SET funds = ? WHERE id = ?;", (self.funds,self.id))

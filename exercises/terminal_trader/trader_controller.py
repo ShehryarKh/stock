@@ -17,8 +17,7 @@ class Controller:
 
 	def login(self): 
 		login = self.view.login()
-		if self.user.check_account(login):
-			self.user.load_accounts()
+		if self.user.check_and_load_account(login):
 			if self.user.is_admin:
 				self.view.welcome_admin(self.user.username)
 				self.admin_menu()
@@ -44,7 +43,7 @@ class Controller:
 		elif self.choice == "5":
 			self.view.quit()
 		else:
-			self.invalid()
+			self.view.invalid()
 			self.menu()
 
 	def search_stocks(self):
@@ -61,31 +60,31 @@ class Controller:
 		# self.choice  ={"symbol":symbol,"num_shares":num_shares}
 		self.choice = self.view.sell_stock()
 		if not self.sell_stock_check(self.choice):
-			self.view.invalid()
 			self.menu()
 		self.choice["symbol"].upper()
 		result = self.markit.get_quote(self.choice["symbol"])
-		total_sale_price = result["LastPrice"]*round(float(self.choice["num_shares"]),2)
-		self.user.update_stocks(self.choice)
-		self.user.funds += total_sale_price
-		self.user.funds -= self.fee 
-		self.user.update_users()
+		total_sale_price = result["LastPrice"]*float(self.choice["num_shares"])
+		self.user.funds += round(total_sale_price,2)
+		self.user.funds -= self.fee
+		self.user.update_stocks(self.choice) 
 		self.user.load_accounts()
 		self.view.sale_confirmation(self.choice,funds=self.user.funds,price = result["LastPrice"],sub = total_sale_price)
-		self.user.load_accounts()
 		self.menu()
 		
 
 	def sell_stock_check(self,sale):
 		if not sale["num_shares"].isdigit():
+			self.view.no_digits_error()
 			return False
 		if not sale["symbol"].isalpha():
+			self.view.not_alpha_error()
 			return False 
 		sale["symbol"] = sale["symbol"].upper()
 
 		for symbol,num_shares in self.user.stocks:
 			if sale["symbol"] == symbol and int(sale["num_shares"]) <= num_shares:
 				return True
+		self.view.invalid_amount()
 		return False
 
 	def choose_company(self,results):
@@ -95,13 +94,12 @@ class Controller:
 			self.choose_company(results)
 		
 		symbol = results[int(company_index["index"])-1]["Symbol"]
-		self.user.symbol = symbol
 		self.stock_details(symbol)
 
 	def stock_details(self,symbol):
 		result = self.markit.get_quote(symbol)
 		self.view.print_details(result)
-		self.stock_menu()
+		self.stock_menu(symbol)
 
 	def choose_company_check(self, company):
 		# company = {"count":count,"index":index}
@@ -114,56 +112,58 @@ class Controller:
 		else:
 			return False 
 
-	def stock_menu(self):
+	def stock_menu(self,symbol):
 		self.choice = self.view.stock_menu()
 		if self.choice == "1":
-			self.buy_stock()
+			self.buy_stock(symbol)
 		elif self.choice == "2":
 			self.menu()
 		else:
 			self.view.invalid()
 			self.menu()
 
-	def buy_stock(self):
+	def buy_stock(self,symbol):
 		self.choice = self.view.buy_stock_amount()
-
-		count = 0 		
-		if not self.choice.isdigit():
+		if not self.buy_stock_check(self.choice):
 			self.view.invalid()
-			self.buy_stock()
-			count+= 1
-		if not int(self.choice):
-			self.view.invalid()
-			self.buy_stock()
-			count+=1
-		if int(self.choice) <= 0:
-			self.view.invalid()
-			self.buy_stock()
-			count+=1
-
-
-		
-		quote = self.markit.get_quote(self.user.symbol)
+		quote = self.markit.get_quote(symbol)
 		price = quote["LastPrice"]
 		
 		
-		if float(self.choice)*price+self.fee > self.user.funds:
-			if count == 2:
-				self.view.insufficient_funds()
-				self.menu()
-			else:
-				count += 1 
-				self.view.insufficient_funds()
-				self.buy_stock()
-		elif float(self.choice)*price + self.fee <= self.user.funds:
-			self.user.funds -= float(self.choice)*price + self.fee
-		self.user.buy_stock(self.choice)
+		if round(float(self.choice),2)*price+self.fee > self.user.funds:
+			self.view.insufficient_funds()
+			self.buy_stock()
+		elif round(float(self.choice),2)*price + self.fee <= self.user.funds:
+			self.user.funds -= round(float(self.choice),2)*price + self.fee
+		self.user.buy_stock(self.choice,symbol)
+		self.user.load_accounts()
 		self.view.buy_confirmation(amount=self.choice,symbol = self.user.symbol,price = price,funds = self.user.funds)
 		self.menu()
 
+	def buy_stock_check(self,amount):			
+		if not amount.isdigit():
+			self.view.invalid()
+			self.buy_stock()
+			return False 
+			
+		elif not int(amount):
+			self.view.invalid()
+			self.buy_stock()
+			return False 
+			
+		elif int(amount) <= 0:
+			self.view.invalid()
+			self.buy_stock()
+			return False
+		else:
+			return True 
+			
+
+
+		
+		
+
 	def view_portfolio(self):
-		self.user.load_accounts()
-	
 		list_=[]
 		portfolio_val = 0 
 		for symbol,num_shares in self.user.stocks:

@@ -109,10 +109,19 @@ Your Remaning Funds are ${}
 		print("Goodbye!")
 
 	def no_results(self):
-		print("----None Found----")
+		print("----NONE Found----")
 
 	def sell_stock(self):
 		symbol = input("SELL: Enter stock symbol:")
 		num_shares = input("Enter # of shares:")
 		dic = {"symbol":symbol,"num_shares":num_shares}
 		return dic 
+
+	def no_digits_error(self):
+		print("-----ERROR: Contains Non Digit-----")
+
+	def not_alpha_error(self):
+		print("-----ERROR: Contains Non Letter-----")
+
+	def invalid_amount(self):
+		print("-----ERROR: INVALID INT/STOCK-----")
