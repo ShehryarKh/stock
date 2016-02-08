@@ -63,6 +63,33 @@ class UserDatabase:
 
 		conn.commit()
 		conn.close()
+
+	def update_stocks(self,dic):
+		conn = sqlite3.connect(self.file_name)
+		cursor = conn.cursor()
+
+		cursor.execute(
+			"""SELECT num_shares
+			FROM Stocks
+			WHERE symbol = ? AND user_id = ?;
+			""",(dic["symbol"],self.id))
+
+		row = cursor.fetchone()
+		num_shares = row[0]
+		if num_shares == int(dic["num_shares"]):
+			cursor.execute(
+				"""DELETE FROM Stocks
+				WHERE symbol = ?;
+				""",(dic["symbol"],))
+		else:
+			cursor.execute(
+				"""UPDATE Stocks 
+				SET num_shares = ?
+				WHERE symbol = ? AND user_id = ?;
+				""",(row[0]-int(dic["num_shares"]),dic["symbol"],self.id))
+
+		conn.commit()
+		conn.close()
 		
 	def buy_stock(self,num_shares):
 		conn = sqlite3.connect(self.file_name)
@@ -80,7 +107,7 @@ class UserDatabase:
 		else:#if row exists
 			id_ = row[0]
 			cursor.execute(
-				"UPDATE Stocks SET num_shares = ? WHERE id = ?;",(row[1]+num_shares, id_))
+				"UPDATE Stocks SET num_shares = ? WHERE id = ?;",(row[1]+int(num_shares), id_))
 				#add numshares to the index row[1] which is where existing num exists
 		cursor.execute(
 			"UPDATE Users SET funds = ? WHERE id = ?;", (self.funds,self.id))
@@ -88,4 +115,6 @@ class UserDatabase:
 
 		conn.commit()
 		conn.close()
+
+	
 

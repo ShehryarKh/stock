@@ -19,7 +19,8 @@ class Controller:
 		login = self.view.login()
 		if self.user.check_account(login):
 			self.user.load_accounts()
-			if self.user.is_admin: 
+			if self.user.is_admin:
+				self.view.welcome_admin(self.user.username)
 				self.admin_menu()
 			else:
 				self.menu()
@@ -37,7 +38,11 @@ class Controller:
 		elif self.choice == "2":
 		 	self.view_portfolio()
 		elif self.choice == "3":
-		 	self.view.quit()
+		 	self.sell_stock()
+		elif self.choice == "4":
+			self.search_stocks()
+		elif self.choice == "5":
+			self.view.quit()
 		else:
 			self.invalid()
 			self.menu()
@@ -49,6 +54,39 @@ class Controller:
 			self.view.no_results
 			self.menu()
 		self.choose_company(results)
+
+	
+
+	def sell_stock(self):
+		# self.choice  ={"symbol":symbol,"num_shares":num_shares}
+		self.choice = self.view.sell_stock()
+		if not self.sell_stock_check(self.choice):
+			self.view.invalid()
+			self.menu()
+		self.choice["symbol"].upper()
+		result = self.markit.get_quote(self.choice["symbol"])
+		total_sale_price = result["LastPrice"]*round(float(self.choice["num_shares"]),2)
+		self.user.update_stocks(self.choice)
+		self.user.funds += total_sale_price
+		self.user.funds -= self.fee 
+		self.user.update_users()
+		self.user.load_accounts()
+		self.view.sale_confirmation(self.choice,funds=self.user.funds,price = result["LastPrice"],sub = total_sale_price)
+		self.user.load_accounts()
+		self.menu()
+		
+
+	def sell_stock_check(self,sale):
+		if not sale["num_shares"].isdigit():
+			return False
+		if not sale["symbol"].isalpha():
+			return False 
+		sale["symbol"] = sale["symbol"].upper()
+
+		for symbol,num_shares in self.user.stocks:
+			if sale["symbol"] == symbol and int(sale["num_shares"]) <= num_shares:
+				return True
+		return False
 
 	def choose_company(self,results):
 		company_index = self.view.choose_company(results)
