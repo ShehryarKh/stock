@@ -11,6 +11,7 @@ class controller():
 		self.quit = ["quit", "q"]
 		self.choice = ''
 		self.market = Markit()
+		#self.num_stocks = 
 
 	def run (self):
 		self.view.start()
@@ -68,18 +69,55 @@ class controller():
 
 	def search_t(self):
 		self.view.search_term()
+
+	def stock_amount(self):
+		num_stocks = self.view.how_many()
+		return num_stocks
+
+	def price(self,stock_amount):
+		price = self.market.recent_quote['LastPrice']*(self.stock_amount())
+		self.view.total_cost(price)
+		return price
+
+	#def price_p(self):
+	#	price = self.market.recent_quote['LastPrice']*(self.stock_amount())
+	#	return price
+
+	def symbol(self):
+		symbol = self.market.recent_quote['Symbol']
+		return symbol
+
+	def total_price(self):
+		total_price = self.price(self.stock_amount())
+		return total_price
+
+
 # 	buying stocks
 	def buy_stock(self):
+		#buy or go main meny
 		option = self.view.buy_main()
 		if option == '1':
-			num_stocks = self.view.display_check()
-			price = self.market.recent_quote['LastPrice']*(num_stocks)
-			print("thats a total of ${}".format(price))
-			self.view.display_option()
-			return price
+			#how many stock you waana purchase
+			total_price = self.price(self.stock_amount)
 
+			yes = self.view.display_option()
+			if yes == 'y':
+				self.purchase(total_price)
+				self.view.you_bought(self.stock_amount, self.symbol, self.price)
+				print(self.user.funds)
 	
-	def purchase(self, price):
+	def purchase(self, cost):
+		while cost > self.user.funds:
+			self.view.insufficient_funds()
+			# code to get user to choose num stock again
+		if cost < self.user.funds:
+			self.user.funds -= cost
+			self.user.update_users(self.user.funds)
+			return self.user.funds
+
+
+
+
 
 
 

@@ -7,6 +7,7 @@ class UserDatabase:
 		self.id = ''
 		self.username = ''
 		self.password = ''
+		self.symbol = ''
 		self.funds = None
 		self.premission_level = 0
 		self.stocks = None
@@ -53,3 +54,21 @@ class UserDatabase:
 			return None
 		self.stocks = row
 		return row
+
+	def update_users(self,remaining_funds):
+		conn  = sqlite3.connect(self.filename)
+		cursor = conn.cursor()
+		cursor.execute(
+			""" UPDATE Users SET funds = ? WHERE id = ?;""",(remaining_funds, self.id))
+		conn.commit()
+		conn.close()	
+		
+	def buy_stock(self,num_shares):
+		conn  = sqlite3.connect(self.filename)
+		cursor = conn.cursor()
+		cursor.execute(
+			""" INSERT INTO Stock(symbol,num_shares,user_id) VALUES (?,?,?);""", (self.symbol, num_shares, self.id)
+			)
+		conn.commit()
+		conn.close()
+

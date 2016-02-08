@@ -60,7 +60,7 @@ class View:
 			""")
 		return buy_main
 
-	def display_check(self):
+	def how_many(self):
 		num_stocks = int(input("How many stocks do you want to purchase?"))
 		return num_stocks
 		
@@ -75,6 +75,15 @@ class View:
 )
 		return buy_menu
 
+	def total_cost(self,price):
+		print("thats a total of ${}".format(price))
 
+
+	def insufficient_funds(self):
+		print("you have insufficient funds")
+
+
+	def you_bought(self,sybmol,price,num_stocks):
+		print("you now own {} stock of {} valued at ${}".format(num_stocks,sybmol,price))
 		
 
