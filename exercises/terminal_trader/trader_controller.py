@@ -11,6 +11,7 @@ class controller():
 		self.quit = ["quit", "q"]
 		self.choice = ''
 		self.market = Markit()
+
 		#self.num_stocks = 
 
 	def run (self):
@@ -74,8 +75,8 @@ class controller():
 		num_stocks = self.view.how_many()
 		return num_stocks
 
-	def price(self,stock_amount):
-		price = self.market.recent_quote['LastPrice']*(self.stock_amount())
+	def price(self,x):
+		price = self.market.recent_quote['LastPrice'] * x
 		self.view.total_cost(price)
 		return price
 
@@ -98,12 +99,12 @@ class controller():
 		option = self.view.buy_main()
 		if option == '1':
 			#how many stock you waana purchase
-			total_price = self.price(self.stock_amount)
+			total_price = self.price(self.stock_amount())
 
 			yes = self.view.display_option()
 			if yes == 'y':
 				self.purchase(total_price)
-				self.view.you_bought(self.stock_amount, self.symbol, self.price)
+				self.view.you_bought(self.stock_amount(), self.symbol(), self.price(self.stock_amount))
 				print(self.user.funds)
 	
 	def purchase(self, cost):
